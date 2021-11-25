@@ -12,6 +12,9 @@ class VibrateMethodCallHandler implements MethodChannel.MethodCallHandler {
     private final Vibrator vibrator;
     private final boolean hasVibrator;
     private final boolean legacyVibrator;
+    long[] timings = { 12, 12, };
+    int[] amplitudes = {0, 255,};
+    boolean isVibrating = false;
 
     VibrateMethodCallHandler(Vibrator vibrator) {
         assert (vibrator != null);
@@ -21,14 +24,33 @@ class VibrateMethodCallHandler implements MethodChannel.MethodCallHandler {
     }
 
     @SuppressWarnings("deprecation")
-    private void vibrate(int duration) {
+    private void vibrate(int duration, int amplitude) {
         if (hasVibrator) {
             if (legacyVibrator) {
                 vibrator.vibrate(duration);
             } else {
-                vibrator.vibrate(VibrationEffect.createOneShot(duration, VibrationEffect.DEFAULT_AMPLITUDE));
+           vibrator.vibrate(VibrationEffect.createOneShot(duration, amplitude));
             }
         }
+    }
+
+    @SuppressWarnings("deprecation")
+    private void loopVibrate(int duration, int amplitude) {
+        long[] loopTimings = { duration, duration, };
+        long[] legacyLoopTimings = {0, duration, duration, };
+        int[] loopAmplitudes = {0, amplitude,};
+isVibrating = true;
+if (hasVibrator) {
+    if (legacyVibrator) {
+        vibrator.vibrate(legacyLoopTimings, 0);
+    } else {
+        vibrator.vibrate(VibrationEffect.createWaveform(loopTimings, loopAmplitudes, 0));
+    }
+
+
+}
+        
+    
     }
 
     @Override
@@ -39,41 +61,20 @@ class VibrateMethodCallHandler implements MethodChannel.MethodCallHandler {
                 break;
             case "vibrate":
                 final int duration = call.argument("duration");
-                vibrate(duration);
+                final int amplitude = call.argument("amplitude");
+                vibrate(duration, amplitude);
                 result.success(null);
                 break;
-            case "impact":
-                vibrate(HapticFeedbackConstants.VIRTUAL_KEY);
+                case "cancel":
+                vibrator.cancel();
                 result.success(null);
                 break;
-            case "selection":
-                vibrate(HapticFeedbackConstants.KEYBOARD_TAP);
-                result.success(null);
-                break;
-            case "success":
-                vibrate(50);
-                result.success(null);
-                break;
-            case "warning":
-                vibrate(250);
-                result.success(null);
-                break;
-            case "error":
-                vibrate(500);
-                result.success(null);
-                break;
-            case "heavy":
-                vibrate(100);
-                result.success(null);
-                break;
-            case "medium":
-                vibrate(40);
-                result.success(null);
-                break;
-            case "light":
-                vibrate(10);
-                result.success(null);
-                break;
+              case "loop":
+              final int gduration = call.argument("duration");
+              final int gamplitude = call.argument("amplitude");
+              loopVibrate(gduration, gamplitude);
+              result.success(null);
+              break;
             default:
                 result.notImplemented();
                 break;

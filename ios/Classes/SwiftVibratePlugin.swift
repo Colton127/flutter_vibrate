@@ -1,8 +1,10 @@
 import Flutter
 import UIKit
 import AudioToolbox
+import CoreHaptics
 
-private let isDevice = TARGET_OS_SIMULATOR == 0
+@available(iOS 13.0, *)
+let hapticManager = HapticEngineManager()
     
 public class SwiftVibratePlugin: NSObject, FlutterPlugin {
   public static func register(with registrar: FlutterPluginRegistrar) {
@@ -14,86 +16,24 @@ public class SwiftVibratePlugin: NSObject, FlutterPlugin {
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
       switch (call.method) {
           case "canVibrate":
-              if isDevice {
-                result(true)
-              } else {
-                result(false)
-              }
-          case "vibrate":
-            AudioServicesPlaySystemSound(kSystemSoundID_Vibrate)
-            // Feedback
-          case "impact":
-            if #available(iOS 10.0, *) {
-              let impact = UIImpactFeedbackGenerator()
-              impact.prepare()
-              impact.impactOccurred()
-            } else {
-              // Fallback on earlier versions
-              AudioServicesPlaySystemSound(kSystemSoundID_Vibrate)
+      if #available(iOS 13.0, *) {
+        result(CHHapticEngine.capabilitiesForHardware().supportsHaptics)
+      } else {
+        result(false)
+      }
+      break
+          case "loop":
+            if #available(iOS 13.0, *) {
+            let duration = ((call.arguments as! [String: Any])["duration"]) as! Double;
+            let amplitude = ((call.arguments as! [String: Any])["amplitude"]) as! Float;    
+            hapticManager.createAdvancedPlayer(duration: duration, amplitude: amplitude, result: result)
             }
-          case "selection":
-            if #available(iOS 10.0, *) {
-              let selection = UISelectionFeedbackGenerator()
-              selection.prepare()
-              selection.selectionChanged()
-            } else {
-              // Fallback on earlier versions
-              AudioServicesPlaySystemSound(kSystemSoundID_Vibrate)
+
+            case "cancel":
+ if #available(iOS 13.0, *) {
+             hapticManager.stopAdvancedPlayer()
             }
-          case "success":
-            if #available(iOS 10.0, *) {
-              let notification = UINotificationFeedbackGenerator()
-              notification.prepare()
-              notification.notificationOccurred(.success)
-            } else {
-              // Fallback on earlier versions
-              AudioServicesPlaySystemSound(kSystemSoundID_Vibrate)
-            }
-          case "warning":
-            if #available(iOS 10.0, *) {
-              let notification = UINotificationFeedbackGenerator()
-              notification.prepare()
-              notification.notificationOccurred(.warning)
-            } else {
-              // Fallback on earlier versions
-              AudioServicesPlaySystemSound(kSystemSoundID_Vibrate)
-            }
-          case "error":
-            if #available(iOS 10.0, *) {
-              let notification = UINotificationFeedbackGenerator()
-              notification.prepare()
-              notification.notificationOccurred(.error)
-            } else {
-              // Fallback on earlier versions
-              AudioServicesPlaySystemSound(kSystemSoundID_Vibrate)
-            }
-          case "heavy":
-            if #available(iOS 10.0, *) {
-              let generator = UIImpactFeedbackGenerator(style: .heavy)
-              generator.prepare()
-              generator.impactOccurred()
-            } else {
-              // Fallback on earlier versions
-              AudioServicesPlaySystemSound(kSystemSoundID_Vibrate)
-            }
-         case "medium":
-            if #available(iOS 10.0, *) {
-              let generator = UIImpactFeedbackGenerator(style: .medium)
-              generator.prepare()
-              generator.impactOccurred()
-            } else {
-              // Fallback on earlier versions
-              AudioServicesPlaySystemSound(kSystemSoundID_Vibrate)
-            }
-         case "light":
-            if #available(iOS 10.0, *) {
-              let generator = UIImpactFeedbackGenerator(style: .light)
-              generator.prepare()
-              generator.impactOccurred()
-            } else {
-              // Fallback on earlier versions
-              AudioServicesPlaySystemSound(kSystemSoundID_Vibrate)
-            }
+            break
           default:
               result(FlutterMethodNotImplemented)
       }

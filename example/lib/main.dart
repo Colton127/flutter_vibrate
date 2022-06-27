@@ -11,6 +11,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  final Vibrate vibration = Vibrate();
   bool _canVibrate = true;
   final Iterable<Duration> pauses = [
     const Duration(milliseconds: 500),
@@ -25,12 +26,10 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<void> _init() async {
-    bool canVibrate = await Vibrate.canVibrate;
+    bool canVibrate = await vibration.canVibrate;
     setState(() {
       _canVibrate = canVibrate;
-      _canVibrate
-          ? debugPrint('This device can vibrate')
-          : debugPrint('This device cannot vibrate');
+      _canVibrate ? debugPrint('This device can vibrate') : debugPrint('This device cannot vibrate');
     });
   }
 
@@ -42,96 +41,18 @@ class _MyAppState extends State<MyApp> {
         body: Center(
           child: ListView(children: [
             ListTile(
-              title: const Text('Vibrate'),
+              title: Text('Vibrate. CanVibrate? $_canVibrate'),
+              leading: const Icon(Icons.vibration, color: Colors.teal),
+              onTap: () async {
+                bool result = await vibration.loop(frequency: 38, amplitude: 1);
+                print('got result: $result');
+              },
+            ),
+            ListTile(
+              title: Text('Cancel'),
               leading: const Icon(Icons.vibration, color: Colors.teal),
               onTap: () {
-                if (_canVibrate) Vibrate.vibrate;
-              },
-            ),
-            ListTile(
-              title: const Text('Vibrate with Pauses'),
-              leading: const Icon(Icons.vibration, color: Colors.brown),
-              onTap: () {
-                if (_canVibrate) {
-                  Vibrate.vibrateWithPauses(pauses);
-                }
-              },
-            ),
-            const Divider(height: 1),
-            ListTile(
-              title: const Text('Impact'),
-              leading: const Icon(Icons.tap_and_play, color: Colors.orange),
-              onTap: () {
-                if (_canVibrate) {
-                  Vibrate.feedback(FeedbackType.impact);
-                }
-              },
-            ),
-            ListTile(
-              title: const Text('Selection'),
-              leading: const Icon(Icons.select_all, color: Colors.blue),
-              onTap: () {
-                if (_canVibrate) {
-                  Vibrate.feedback(FeedbackType.selection);
-                }
-              },
-            ),
-            ListTile(
-              title: const Text('Success'),
-              leading: const Icon(Icons.check, color: Colors.green),
-              onTap: () {
-                if (_canVibrate) {
-                  Vibrate.feedback(FeedbackType.success);
-                }
-              },
-            ),
-            ListTile(
-              title: const Text('Warning'),
-              leading: const Icon(Icons.warning, color: Colors.red),
-              onTap: () {
-                if (_canVibrate) {
-                  Vibrate.feedback(FeedbackType.warning);
-                }
-              },
-            ),
-            ListTile(
-              title: const Text('Error'),
-              leading: const Icon(Icons.error, color: Colors.red),
-              onTap: () {
-                if (_canVibrate) {
-                  Vibrate.feedback(FeedbackType.error);
-                }
-              },
-            ),
-            const Divider(height: 1),
-            ListTile(
-              title: const Text('Heavy'),
-              leading:
-                  const Icon(Icons.notification_important, color: Colors.red),
-              onTap: () {
-                if (_canVibrate) {
-                  Vibrate.feedback(FeedbackType.heavy);
-                }
-              },
-            ),
-            ListTile(
-              title: const Text('Medium'),
-              leading:
-                  const Icon(Icons.notification_important, color: Colors.green),
-              onTap: () {
-                if (_canVibrate) {
-                  Vibrate.feedback(FeedbackType.medium);
-                }
-              },
-            ),
-            ListTile(
-              title: const Text('Light'),
-              leading:
-                  Icon(Icons.notification_important, color: Colors.yellow[700]),
-              onTap: () {
-                if (_canVibrate) {
-                  Vibrate.feedback(FeedbackType.light);
-                }
+                vibration.stopVibration();
               },
             ),
           ]),

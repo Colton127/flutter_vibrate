@@ -63,7 +63,7 @@ if (hasVibrator) {
                 final int duration = call.argument("duration");
                 final int amplitude = call.argument("amplitude");
                 vibrate(duration, amplitude);
-                result.success(null);
+                result.success(true);
                 break;
                 case "cancel":
                 vibrator.cancel();
@@ -73,7 +73,7 @@ if (hasVibrator) {
               final int gduration = call.argument("duration");
               final int gamplitude = call.argument("amplitude");
               loopVibrate(gduration, gamplitude);
-              result.success(null);
+              result.success(true);
               break;
             default:
                 result.notImplemented();

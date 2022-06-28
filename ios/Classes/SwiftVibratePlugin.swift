@@ -25,7 +25,7 @@ public class SwiftVibratePlugin: NSObject, FlutterPlugin {
           case "loop":
             if #available(iOS 13.0, *) {
             let duration = ((call.arguments as! [String: Any])["duration"]) as! Double;
-            let amplitude = ((call.arguments as! [String: Any])["amplitude"]) as! Float;    
+            let amplitude = (((call.arguments as! [String: Any])["amplitude"]) as! NSNumber).floatValue;    
             hapticManager.createAdvancedPlayer(duration: duration, amplitude: amplitude, result: result)
             }
 

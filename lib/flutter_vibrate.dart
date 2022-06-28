@@ -8,6 +8,11 @@ class Vibrate {
   Duration defaultVibrationDuration = Duration(milliseconds: 500);
 
   Future<bool> loop({int frequency = 30, double amplitude = 1}) async {
+    if (amplitude == 0) {
+      stopVibration();
+      return false;
+    }
+
     bool feedback = false;
     if (Platform.isIOS) {
       double getTime = (((1000 / frequency / 2) * 1000) / 1000000);
